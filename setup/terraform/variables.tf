@@ -1,6 +1,5 @@
 variable "humanitec_org" {
   description = "The ID of the organization"
-  default     = "humanitec"
   type        = string
 }
 

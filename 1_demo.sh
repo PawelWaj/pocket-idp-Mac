@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+if [ -z "${HUMANITEC_ORG}" ]; then
+    echo "Error: HUMANITEC_ORG environment variable is not set"
+    exit 1
+fi
+
 echo "Deploying workload"
 
 humanitec_app=$(terraform -chdir=setup/terraform output -raw humanitec_app)

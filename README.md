@@ -51,12 +51,14 @@ The workshop combines both theory and hands-on practice, ensuring you leave with
 
 ### Local Development Setup
 
-1. Clone the Backstage repository:
+1. Clone the Pocket IDP repository:
+
    ```bash
-   git clone https://github.com/Nagarro-Platform-Engineering/backstage.git
+   git clone https://github.com/Nagarro-Platform-Engineering/pocket-idp.git
    ```
 
 2. Install Task (if not already installed):
+   
    ```bash
    # macOS
    brew install go-task
@@ -90,11 +92,13 @@ task test          # Test the 5min-idp
 ## Setup Steps
 
 1. **Login to CLI**
+   
    ```bash
    humctl login
    ```
 
 2. **Set Organization Environment Variable**
+
    ```bash
    export HUMANITEC_ORG=<my-org-id>   # Use lowercase org ID
    ```
