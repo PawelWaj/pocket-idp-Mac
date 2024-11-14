@@ -48,7 +48,7 @@ resource "humanitec_resource_definition" "agent" {
   name = local.agent_id
   type = "agent"
 
-  driver_type   = "humanitec/agent"
+  driver_type = "humanitec/agent"
   driver_inputs = {
     values_string = jsonencode({
       id = local.agent_id
@@ -63,9 +63,10 @@ resource "humanitec_resource_definition" "agent" {
 resource "humanitec_resource_definition_criteria" "agent" {
   resource_definition_id = humanitec_resource_definition.agent.id
   res_id                 = "agent"
-  app_id                 = humanitec_application.demo.id
+  env_type               = local.env_type
 
   force_delete = true
+  depends_on   = [humanitec_environment_type.local]
 }
 
 locals {
@@ -80,7 +81,7 @@ resource "humanitec_resource_definition" "cluster_local" {
 
   driver_inputs = {
     values_string = jsonencode({
-      loadbalancer = "127.0.0.1" # ensure dns records are created pointing to localhost
+      loadbalancer = "0.0.0.0" # ensure dns records are created pointing to localhost
       cluster_data = local.parsed_kubeconfig["clusters"][0]["cluster"]
     })
     secrets_string = jsonencode({
@@ -92,11 +93,11 @@ resource "humanitec_resource_definition" "cluster_local" {
 
 resource "humanitec_resource_definition_criteria" "cluster_local" {
   resource_definition_id = humanitec_resource_definition.cluster_local.id
-  app_id                 = humanitec_application.demo.id
+  env_type               = local.env_type
 
   force_delete = true
 
   depends_on = [
-    humanitec_resource_definition_criteria.agent
+    humanitec_resource_definition_criteria.agent_local, humanitec_environment_type.local
   ]
 }

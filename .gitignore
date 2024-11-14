@@ -3,3 +3,6 @@ setup/terraform/.terraform*
 setup/terraform/terraform.tfstate*
 .idea/*
 .envrc
+certs/*
+.env
+.env.*

@@ -1,9 +1,17 @@
 version: '3'
 
+dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
+
 vars:
   IMG_TAG: '{{.IMG_TAG | default "latest"}}'
   IMG: '{{.IMG | default (printf "kheimel/pocket-idp:%s" .IMG_TAG)}}'
   PLATFORM: '{{.PLATFORM | default "linux/amd64,linux/arm64"}}'
+  CERT_DIR: '{{.CERT_DIR | default "certs"}}'
+  ENV_FILE: '.env'
+  REQUIRED_VARS:
+    - HUMANITEC_ORG
+    - HUMANITEC_TOKEN
+    - DOMAIN_NAME
 
 tasks:
   build:
@@ -46,17 +54,6 @@ tasks:
     cmds:
       - tflint --config ../.tflint.hcl --chdir=./setup/terraform
 
-  check-env:
-    internal: true
-    cmds:
-      - |
-        if [ -z "$HUMANITEC_ORG" ]; then
-          echo -e "\033[0;31mError: HUMANITEC_ORG environment variable is not set\033[0m"
-          exit 1
-        else
-          echo -e "\033[0;32m✓ HUMANITEC_ORG is set\033[0m"
-        fi
-
   test:
     aliases: [ t ]
     desc: Test the 5min-idp
@@ -83,4 +80,139 @@ tasks:
           -v $HOME/.humctl:/root/.humctl \
           -v /var/run/docker.sock:/var/run/docker.sock \
           --network bridge \
-          {{.IMG}} 
+          {{.IMG}}
+
+  generate-certs:
+    aliases: [gc]
+    desc: Generate TLS certificates using mkcert for local development
+    cmds:
+      - |
+        # Check if mkcert is installed
+        if ! command -v mkcert &> /dev/null; then
+          echo "❌ mkcert is not installed. Please install it first:"
+          echo "  macOS: brew install mkcert"
+          echo "  Linux: apt install mkcert"
+          echo "  More info: https://github.com/FiloSottile/mkcert#installation"
+          exit 1
+        fi
+      - mkdir -p {{.CERT_DIR}}
+      - mkcert -install
+      - |
+        mkcert -cert-file {{.CERT_DIR}}/server.crt \
+               -key-file {{.CERT_DIR}}/server.key \
+               "5min-idp" \
+               "5min-idp-control-plane" \
+               "kubernetes.docker.internal" \
+               "gitea.localhost" \
+               "grafana.localhost" \
+               "backstage.localhost" \
+               "localhost" \
+               "127.0.0.1" \
+               "::1"
+      - |
+        # Copy root CA for applications that need it
+        cp "$(mkcert -CAROOT)/rootCA.pem" {{.CERT_DIR}}/ca.crt
+      - echo "✅ TLS certificates generated in {{.CERT_DIR}} directory"
+
+  verify-env:
+    aliases: [ve]
+    desc: Verify all required environment variables are set
+    cmds:
+      - |
+        missing_vars=()
+        for var in {{.REQUIRED_VARS}}; do
+          if [ -z "${!var}" ]; then
+            missing_vars+=($var)
+          fi
+        done
+        if [ ${#missing_vars[@]} -ne 0 ]; then
+          echo "❌ Missing required environment variables: ${missing_vars[*]}"
+          exit 1
+        fi
+        echo "✅ All required environment variables are set"
+
+  generate-env:
+    aliases: [ge]
+    desc: Generate template .env file with required variables
+    cmds:
+      - |
+        # Check for required Humanitec variables first
+        if [ -z "$HUMANITEC_ORG" ] || [ -z "$HUMANITEC_TOKEN" ]; then
+          echo "❌ HUMANITEC_ORG and HUMANITEC_TOKEN must be set in the environment before generating .env"
+          exit 1
+        fi
+
+        if [ -f {{.ENV_FILE}} ]; then
+          echo "⚠️ {{.ENV_FILE}} already exists. Backing up to {{.ENV_FILE}}.bak"
+          cp {{.ENV_FILE}} {{.ENV_FILE}}.bak
+        fi
+
+        # Generate initial .env file with header
+        echo "# Generated environment variables for Pocket IDP" > {{.ENV_FILE}}
+        echo "# Generated on $(date)" >> {{.ENV_FILE}}
+        echo "" >> {{.ENV_FILE}}
+
+        # Add existing environment variables if they exist
+        for var in HUMANITEC_ORG HUMANITEC_TOKEN DOMAIN_NAME; do
+          if [ -n "${!var}" ]; then
+            echo "$var=${!var}" >> {{.ENV_FILE}}
+          else
+            echo "$var=" >> {{.ENV_FILE}}
+          fi
+        done
+
+        # Add Humanitec service user if it exists
+        if [ -n "$HUMANITEC_SERVICE_USER" ]; then
+          echo "HUMANITEC_SERVICE_USER=${HUMANITEC_SERVICE_USER}" >> {{.ENV_FILE}}
+        else
+          echo "HUMANITEC_SERVICE_USER=" >> {{.ENV_FILE}}
+        fi
+
+        # Add certificate paths and base64 encoded values
+        echo "" >> {{.ENV_FILE}}
+        echo "# TLS Certificate paths" >> {{.ENV_FILE}}
+        echo "CERT_DIR={{.CERT_DIR}}" >> {{.ENV_FILE}}
+        echo "TLS_CERT={{.CERT_DIR}}/server.crt" >> {{.ENV_FILE}}
+        echo "TLS_KEY={{.CERT_DIR}}/server.key" >> {{.ENV_FILE}}
+        echo "TLS_CA={{.CERT_DIR}}/ca.crt" >> {{.ENV_FILE}}
+
+        # Add base64 encoded certificates if they exist
+        if [ -f "{{.CERT_DIR}}/server.crt" ]; then
+          echo "TLS_CERT_STRING=$(cat {{.CERT_DIR}}/server.crt | base64)" >> {{.ENV_FILE}}
+        else
+          echo "TLS_CERT_STRING=" >> {{.ENV_FILE}}
+        fi
+
+        if [ -f "{{.CERT_DIR}}/server.key" ]; then
+          echo "TLS_KEY_STRING=$(cat {{.CERT_DIR}}/server.key | base64)" >> {{.ENV_FILE}}
+        else
+          echo "TLS_KEY_STRING=" >> {{.ENV_FILE}}
+        fi
+
+        if [ -f "{{.CERT_DIR}}/ca.crt" ]; then
+          echo "TLS_CA_CERT=$(cat {{.CERT_DIR}}/ca.crt | base64)" >> {{.ENV_FILE}}
+        else
+          echo "TLS_CA_CERT=" >> {{.ENV_FILE}}
+        fi
+
+        echo "✅ Template {{.ENV_FILE}} file generated"
+
+        # Remind user to generate certificates if they don't exist
+        if [ ! -f "{{.CERT_DIR}}/server.crt" ]; then
+          echo "ℹ️ Don't forget to generate TLS certificates using: task generate-certs"
+        fi
+    requires:
+      vars:
+        - HUMANITEC_ORG
+        - HUMANITEC_TOKEN
+    vars:
+      HUMANITEC_ORG:
+        sh: echo "{{.HUMANITEC_ORG}}"
+      HUMANITEC_TOKEN:
+        sh: echo "{{.HUMANITEC_TOKEN}}"
+
+  check-env:
+    internal: true
+    deps: [verify-env]
+    cmds:
+      - echo "✅ Environment check passed"

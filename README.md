@@ -58,7 +58,7 @@ The workshop combines both theory and hands-on practice, ensuring you leave with
    ```
 
 2. Install Task (if not already installed):
-   
+
    ```bash
    # macOS
    brew install go-task
@@ -92,7 +92,7 @@ task test          # Test the 5min-idp
 ## Setup Steps
 
 1. **Login to CLI**
-   
+
    ```bash
    humctl login
    ```
@@ -243,3 +243,85 @@ Humanitec documentation.
    ```
    pre-commit autoupdate
    ```
+
+## TLS Certificate Management
+
+For secure local development, we use `mkcert` to generate locally-trusted development certificates. This provides a more secure and convenient way to handle HTTPS during development.
+
+### Installing mkcert
+
+Before generating certificates, you need to install mkcert:
+
+```bash
+# macOS
+brew install mkcert
+
+# Linux (Ubuntu/Debian)
+sudo apt install mkcert
+
+# Windows (with chocolatey)
+choco install mkcert
+```
+
+For other platforms, see the [mkcert installation guide](https://github.com/FiloSottile/mkcert#installation).
+
+### Generate Certificates
+
+Once mkcert is installed, you can generate certificates using:
+
+```bash
+# Generate certificates for localhost (default)
+task generate-certs
+
+# Or specify a custom domain
+task generate-certs DOMAIN_NAME=my-app.local
+```
+
+This will:
+1. Install mkcert's local CA in your system trust store
+2. Generate certificates in the `./certs` directory:
+   - `server.crt`: Server certificate
+   - `server.key`: Server private key
+   - `ca.crt`: Copy of the root CA certificate
+
+The certificates will be automatically trusted by your system and browsers.
+
+### Certificate Locations
+
+The generated certificates will be stored in the `certs` directory:
+```
+certs/
+├── ca.crt      # Root CA certificate
+├── server.crt  # Server certificate
+└── server.key  # Server private key
+```
+
+### Environment Variables
+
+Remember to set up your environment variables:
+
+```bash
+# Generate a template .env file
+task generate-env
+
+# Verify all required variables are set
+task verify-env
+```
+
+Required environment variables:
+- `HUMANITEC_ORG`: Your Humanitec organization ID
+- `HUMANITEC_TOKEN`: Your Humanitec access token
+- `DOMAIN_NAME`: Domain name for TLS certificates (defaults to localhost)
+
+You can set these variables in a `.env` file or export them in your shell:
+
+```bash
+# Using .env file (recommended)
+task generate-env
+vim .env  # Fill in the values
+
+# Or export directly in shell
+export HUMANITEC_ORG=my-org
+export HUMANITEC_TOKEN=my-token
+export DOMAIN_NAME=localhost
+```

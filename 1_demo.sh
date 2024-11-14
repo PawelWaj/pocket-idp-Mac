@@ -10,11 +10,12 @@ echo "Deploying workload"
 
 humanitec_app=$(terraform -chdir=setup/terraform output -raw humanitec_app)
 
-humctl score deploy --app "$humanitec_app" --env development -f ./score.yaml --wait
+humctl score deploy --app "$humanitec_app" --env 5min-local -f ./score.yaml --wait
 
-workload_host=$(humctl get active-resources --app "$humanitec_app" --env development -o yaml | yq '.[] | select(.metadata.type == "route") | .status.resource.host')
+workload_host=$(humctl get active-resources --app "$humanitec_app" --env 5min-local  -o yaml | yq '.[] | select(.metadata.type == "route") | .status.resource.host')
 
 echo "Waiting for workload to be available"
+
 
 # manually change the host here as the workload host resolves to localhost, which is not reachable from the container
 if curl -I --retry 30 --retry-delay 3 --retry-all-errors --fail \

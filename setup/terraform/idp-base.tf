@@ -8,15 +8,43 @@ resource "random_string" "install_id" {
 }
 
 locals {
-  app    = "5min-idp-${random_string.install_id.result}"
-  prefix = "${local.app}-"
+  app       = "5min-idp-${random_string.install_id.result}"
+  backstage = "5min-backstage-${random_string.install_id.result}"
+  prefix    = "${local.app}-"
+  env_type  = "5min-local"
+}
+
+resource "humanitec_environment_type" "local" {
+  id          = local.env_type
+  description = "Local cluster used by 5min IDP."
 }
 
 resource "humanitec_application" "demo" {
   id   = local.app
   name = local.app
 }
+resource "humanitec_environment" "demo" {
+  app_id = local.app
+  id     = local.env_type
+  name   = "5min IDP local environment"
+  type   = local.env_type
 
+  depends_on = [humanitec_environment_type.local, humanitec_application.demo]
+}
+# Backstage application & config
+resource "humanitec_application" "backstage" {
+  id   = local.backstage
+  name = local.backstage
+}
+
+resource "humanitec_environment" "backstage" {
+  app_id = local.backstage
+  id     = local.env_type
+  name   = "5min IDP local environment"
+  type   = local.env_type
+
+  depends_on = [humanitec_environment_type.local, humanitec_application.backstage]
+}
 # Configure k8s namespace naming
 
 resource "humanitec_resource_definition" "k8s_namespace" {
@@ -45,10 +73,11 @@ resource "humanitec_resource_definition" "dns_localhost" {
   id          = "${local.prefix}dns-localhost"
   name        = "${local.prefix}dns-localhost"
   type        = "dns"
-  driver_type = "humanitec/newapp-io-dns"
+  driver_type = "humanitec/dns-wildcard"
 
   driver_inputs = {
     values_string = jsonencode({
+      "domain"   = "localhost"
       "template" = "$${context.app.id}-{{ randAlphaNum 4 | lower}}"
     })
   }
@@ -63,9 +92,10 @@ resource "humanitec_resource_definition" "dns_localhost" {
 
 resource "humanitec_resource_definition_criteria" "dns_localhost" {
   resource_definition_id = humanitec_resource_definition.dns_localhost.id
-  app_id                 = humanitec_application.demo.id
+  env_type               = local.env_type
 
   force_delete = true
+  depends_on   = [humanitec_environment_type.local]
 }
 
 # Provide postgres resource
@@ -78,7 +108,8 @@ module "postgres_basic" {
 resource "humanitec_resource_definition_criteria" "postgres_basic" {
   resource_definition_id = module.postgres_basic.id
   class                  = "default"
-  app_id                 = humanitec_application.demo.id
+  env_type               = local.env_type
 
   force_delete = true
+  depends_on   = [humanitec_environment_type.local]
 }
