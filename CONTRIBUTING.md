@@ -1,6 +1,7 @@
 # Contributing Guidelines
 
-Thank you for your interest in contributing to this project. As this is a proprietary project owned by Nagarro, we have specific guidelines for contributions.
+Thank you for your interest in contributing to this project. As this is a proprietary project owned by Nagarro, we have
+specific guidelines for contributions.
 
 ## Before Contributing
 
@@ -11,33 +12,33 @@ Thank you for your interest in contributing to this project. As this is a propri
 ## How to Contribute
 
 1. **Fork & Branch**
-   - Create a new branch for your feature/fix
-   - Use meaningful branch names (e.g., `feature/new-feature` or `fix/bug-description`)
+    - Create a new branch for your feature/fix
+    - Use meaningful branch names (e.g., `feature/new-feature` or `fix/bug-description`)
 
 2. **Code Standards*
-   - Follow the established coding style and conventions
-   - Write clear, documented code
-   - Include appropriate tests for new features
+    - Follow the established coding style and conventions
+    - Write clear, documented code
+    - Include appropriate tests for new features
 
 3. **Commit Guidelines**
-   - Follow [Conventional Commits](https://www.conventionalcommits.org/) format
-     - Example: `feat: add user authentication`
-     - Example: `fix: resolve login timeout issue`
-   - Write clear, concise commit messages
-   - Reference relevant issue numbers in commits
-   - Keep commits small and focused on single changes
-   - Make atomic commits that can be easily reviewed and reverted if needed
+    - Follow [Conventional Commits](https://www.conventionalcommits.org/) format
+        - Example: `feat: add user authentication`
+        - Example: `fix: resolve login timeout issue`
+    - Write clear, concise commit messages
+    - Reference relevant issue numbers in commits
+    - Keep commits small and focused on single changes
+    - Make atomic commits that can be easily reviewed and reverted if needed
 
 4. **Pull Requests**
-   - Create a detailed PR description
-   - Link related issues
-   - Ensure all tests pass
-   - Request review from appropriate team members
+    - Create a detailed PR description
+    - Link related issues
+    - Ensure all tests pass
+    - Request review from appropriate team members
 
 5. **Code Review**
-   - Be responsive to review comments
-   - Make requested changes promptly
-   - Keep discussions professional and constructive
+    - Be responsive to review comments
+    - Make requested changes promptly
+    - Keep discussions professional and constructive
 
 ## Development Setup
 

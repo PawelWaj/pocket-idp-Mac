@@ -31,13 +31,13 @@ tasks:
 
   lint:
     desc: Lint terraform directory
-    deps: [lint-init]
+    deps: [ lint-init ]
     cmds:
       - tflint --config ../.tflint.hcl --chdir=./setup/terraform
 
   test:
     desc: Test the 5min-idp
-    deps: [build, check-image]
+    deps: [ build, check-image ]
     cmds:
       - |
         docker run --rm -i -h 5min-idp --name 5min-idp \
@@ -50,7 +50,7 @@ tasks:
 
   run-local:
     desc: Run the locally built image
-    deps: [build]
+    deps: [ build ]
     cmds:
       - |
         docker run --rm -it -h 5min-idp --name 5min-idp \

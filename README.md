@@ -2,7 +2,8 @@
 
 ## Workshop Overview
 
-Welcome to the Platform Engineering Bootcamp Workshop at FLO 2024 in Gurgaon! This hands-on workshop focuses on building a practical Internal Developer Platform (IDP) using Backstage and Humanitec.
+Welcome to the Platform Engineering Bootcamp Workshop at FLO 2024 in Gurgaon! This hands-on workshop focuses on building
+a practical Internal Developer Platform (IDP) using Backstage and Humanitec.
 
 In this workshop, you'll:
 
@@ -147,11 +148,13 @@ task test          # Test the 5min-idp
 ## Troubleshooting
 
 If you see this error:
+
 ```bash
 ERROR: could not locate any control plane nodes for cluster named '5min-idp'
 ```
 
 Follow these steps:
+
 1. Exit the container (`exit`)
 2. Remove the volume (`docker volume rm hum-5min-idp`)
 3. Start over from the "Start the Dev Container" step
@@ -159,6 +162,7 @@ Follow these steps:
 ## What's Happening Behind the Scenes?
 
 This setup:
+
 1. Creates a dev container with required tooling
 2. Launches a Kubernetes cluster using kind
 3. Creates an Application in Platform Orchestrator
@@ -166,4 +170,72 @@ This setup:
 5. Configures Humanitec Agent for secure communication
 6. Deploys a sample workload with database connectivity
 
-For more details, check out the [Five-minute IDP guide](https://developer.humanitec.com/introduction/getting-started/the-five-minute-idp/) in the Humanitec documentation.
+For more details, check out
+the [Five-minute IDP guide](https://developer.humanitec.com/introduction/getting-started/the-five-minute-idp/) in the
+Humanitec documentation.
+
+# Local Development Setup
+
+## 🛠️Project Tooling Setup Guide
+
+### Ensure you have the following tools installed and configured before proceeding:
+
+- **taskfile**: A task runner and build tool that allows you to define tasks in a simple file. Install instructions can
+  be found [here](https://taskfile.dev/#/installation).
+
+- **pre-commit**: A framework for managing and maintaining multi-language pre-commit hooks. Install instructions can be
+  found [here](https://pre-commit.com/#install).
+
+- **gitleaks**: A SAST tool for detecting hardcoded secrets like passwords, API keys, and tokens in git repositories.
+  Install instructions can be found [here](https://github.com/gitleaks/gitleaks#installing).
+
+- **terraform**: Terraform for infrastructure provisioning. Install instructions can be
+  found [here](https://learn.hashicorp.com/tutorials/terraform/install-cli).
+
+- **tflint**: Terraform linter for identifying errors and potential issues. Install instructions can be
+  found [here](https://github.com/terraform-linters/tflint#installation).
+
+- **terraform-docs**: Generate documentation from Terraform modules. Install instructions can be
+  found [here](https://github.com/terraform-docs/terraform-docs#installation).
+
+- **terratest**: Terraform testing framework for automated testing. Install instructions can be
+  found [here](https://terratest.gruntwork.io/docs/getting-started/quick-start/).
+
+- **checkov**: Infrastructure as code static analysis tool for security and compliance scanning. Install instructions
+  can be found [here](https://www.checkov.io/2.Basics/Installing%20Checkov.html).
+
+#### Activating Pre-commit Hooks in your Local Repository
+
+**Activating Pre-commit in the Repository**
+
+1. **Install Pre-commit**: Install instructions can be
+   found [here](https://pre-commit.com/#install).
+
+2. **Initialize Pre-commit**: Run the following command to initialize Pre-commit in your local repository:
+
+   ```bash
+   pre-commit install --hook-type commit-msg
+   ```
+   Note: This command creates a `.git/hooks/pre-commit` script that runs the Pre-commit hooks defined in the
+   `.pre-commit-config.yaml` file.
+
+3. **Commit Changes**: Once Pre-commit is installed and initialized, commit your changes as usual using Git. Pre-commit
+   will automatically run the configured hooks before each commit.
+   If you want to run the hooks manually, you can use the following command:
+
+   ```bash
+   pre-commit run --all-files
+   ```
+
+   If you want to disable the hooks for a single commit, you can use the following command:
+
+   ```bash
+    git commit --no-verify
+   ```
+
+4. **Updating Pre-commit Hooks**: Periodically update Pre-commit hooks to ensure that you're using the latest versions
+   of the tools and scripts. Run the following command to update the hooks:
+
+   ```
+   pre-commit autoupdate
+   ```

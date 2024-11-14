@@ -46,9 +46,9 @@ repos:
     hooks:
       - id: checkov
         args:
-        - --download-external-modules=true
-        - --config-file=.checkov.yaml
-        - --quiet
+          - --download-external-modules=true
+          - --config-file=.checkov.yaml
+          - --quiet
 
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.24
@@ -67,18 +67,18 @@ repos:
     hooks:
       - id: flake8
         args:
-        -   --max-line-length=120
-        -   --ignore=E203,E501,W503
+          - --max-line-length=120
+          - --ignore=E203,E501,W503
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 'v0.7.3'
     hooks:
       - id: ruff
-        types_or: [python, pyi, jupyter]
+        types_or: [ python, pyi, jupyter ]
         args: [ --fix, --exit-non-zero-on-fix ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
-        args: [--ignore-missing-imports]
+        args: [ --ignore-missing-imports ]
