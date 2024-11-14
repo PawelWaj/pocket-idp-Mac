@@ -8,12 +8,26 @@ vars:
   PLATFORM: '{{.PLATFORM | default "linux/amd64,linux/arm64"}}'
   CERT_DIR: '{{.CERT_DIR | default "certs"}}'
   ENV_FILE: '.env'
-  REQUIRED_VARS:
-    - HUMANITEC_ORG
-    - HUMANITEC_TOKEN
-    - DOMAIN_NAME
 
 tasks:
+  run-local:
+    aliases: [ r, run ]
+    desc: Run the locally built image
+    deps: [ build, check-env ]
+    cmds:
+      - |
+        docker run --rm -it -h pocketidp --name 5min-idp \
+          -e HUMANITEC_ORG \
+          -e HUMANITEC_SERVICE_USER \
+          -e TLS_CA_CERT \
+          -e TLS_CERT_STRING \
+          -e TLS_KEY_STRING \
+          -v hum-5min-idp:/state \
+          -v $HOME/.humctl:/root/.humctl \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          --network bridge \
+          {{.IMG}}
+
   build:
     aliases: [ b ]
     desc: Build the 5min-idp image
@@ -68,20 +82,6 @@ tasks:
           --network bridge \
           {{.IMG}} ./image/test.sh
 
-  run-local:
-    aliases: [ r, run ]
-    desc: Run the locally built image
-    deps: [ build, check-env ]
-    cmds:
-      - |
-        docker run --rm -it -h 5min-idp --name 5min-idp \
-          -e HUMANITEC_ORG=${HUMANITEC_ORG} \
-          -v hum-5min-idp:/state \
-          -v $HOME/.humctl:/root/.humctl \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          --network bridge \
-          {{.IMG}}
-
   generate-certs:
     aliases: [gc]
     desc: Generate TLS certificates using mkcert for local development
@@ -119,6 +119,15 @@ tasks:
     desc: Verify all required environment variables are set
     cmds:
       - |
+        # First check if HUMANITEC_TOKEN is not set but can be retrieved from humctl
+        if [ -z "${HUMANITEC_TOKEN}" ] && [ -f "$HOME/.humctl" ]; then
+          export HUMANITEC_TOKEN=$(yq -r '.token' "$HOME/.humctl")
+          if [ "${HUMANITEC_TOKEN}" != "null" ] && [ -n "${HUMANITEC_TOKEN}" ]; then
+            echo "ℹ️ Using token from humctl configuration"
+          fi
+        fi
+
+        # Then proceed with regular verification
         missing_vars=()
         for var in {{.REQUIRED_VARS}}; do
           if [ -z "${!var}" ]; then
@@ -127,6 +136,9 @@ tasks:
         done
         if [ ${#missing_vars[@]} -ne 0 ]; then
           echo "❌ Missing required environment variables: ${missing_vars[*]}"
+          echo "ℹ️ If HUMANITEC_TOKEN is missing, you can:"
+          echo "   1. Set it directly in your environment"
+          echo "   2. Login using 'humctl auth login'"
           exit 1
         fi
         echo "✅ All required environment variables are set"
@@ -136,9 +148,18 @@ tasks:
     desc: Generate template .env file with required variables
     cmds:
       - |
-        # Check for required Humanitec variables first
+        # Check for Humanitec token in humctl config if not set in environment
+        if [ -z "$HUMANITEC_TOKEN" ] && [ -f "$HOME/.humctl" ]; then
+          export HUMANITEC_TOKEN=$(yq -r '.token' "$HOME/.humctl")
+          echo "ℹ️ Using token from humctl configuration"
+        fi
+
+        # Check for required Humanitec variables
         if [ -z "$HUMANITEC_ORG" ] || [ -z "$HUMANITEC_TOKEN" ]; then
           echo "❌ HUMANITEC_ORG and HUMANITEC_TOKEN must be set in the environment before generating .env"
+          echo "ℹ️ If HUMANITEC_TOKEN is missing, you can:"
+          echo "   1. Set it directly in your environment"
+          echo "   2. Login using 'humctl auth login'"
           exit 1
         fi
 
@@ -201,10 +222,6 @@ tasks:
         if [ ! -f "{{.CERT_DIR}}/server.crt" ]; then
           echo "ℹ️ Don't forget to generate TLS certificates using: task generate-certs"
         fi
-    requires:
-      vars:
-        - HUMANITEC_ORG
-        - HUMANITEC_TOKEN
     vars:
       HUMANITEC_ORG:
         sh: echo "{{.HUMANITEC_ORG}}"

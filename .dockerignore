@@ -1,2 +1,12 @@
 .github
 setup/terraform/.terraform*
+.env
+.env.*
+certs
+**/.tfplan
+**/.tfstate
+**/.tfstate.*
+.idea
+.vscode
+.github
+stuff
