@@ -1,0 +1,62 @@
+version: '3'
+
+vars:
+  IMG_TAG: '{{.IMG_TAG | default "latest"}}'
+  IMG: '{{.IMG | default (printf "kheimel/pocket-idp:%s" .IMG_TAG)}}'
+  PLATFORM: '{{.PLATFORM | default "linux/amd64,linux/arm64"}}'
+
+tasks:
+  build:
+    desc: Build the 5min-idp image
+    cmds:
+      - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} .
+      # Ideally we could remove the next step, but docker on GHA doesn't support
+      # loading multi-platform builds yet
+      - docker buildx build -t {{.IMG}} --load .
+
+  check-image:
+    desc: Check the 5min-idp image
+    cmds:
+      - docker run --rm -v {{.PWD}}:/app {{.IMG}} ./image/check.sh
+
+  push:
+    desc: Push the 5min-idp image
+    cmds:
+      - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} --push .
+
+  lint-init:
+    desc: Initialize tflint
+    cmds:
+      - tflint --init
+
+  lint:
+    desc: Lint terraform directory
+    deps: [lint-init]
+    cmds:
+      - tflint --config ../.tflint.hcl --chdir=./setup/terraform
+
+  test:
+    desc: Test the 5min-idp
+    deps: [build, check-image]
+    cmds:
+      - |
+        docker run --rm -i -h 5min-idp --name 5min-idp \
+          -e HUMANITEC_ORG \
+          -v hum-5min-idp:/state \
+          -v $HOME/.humctl:/root/.humctl \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          --network bridge \
+          {{.IMG}} ./image/test.sh
+
+  run-local:
+    desc: Run the locally built image
+    deps: [build]
+    cmds:
+      - |
+        docker run --rm -it -h 5min-idp --name 5min-idp \
+          -e HUMANITEC_ORG \
+          -v hum-5min-idp:/state \
+          -v $HOME/.humctl:/root/.humctl \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          --network bridge \
+          {{.IMG}} 
