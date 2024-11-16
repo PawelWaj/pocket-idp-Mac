@@ -117,7 +117,7 @@ curl -k -X 'POST' \
   -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
   -H 'Content-Type: application/json' \
   -d '{
-  "clone_addr": "https://github.com/humanitec-architecture/backstage.git",
+  "clone_addr": "https://github.com/Nagarro-Platform-Engineering/backstage.git",
   "mirror": false,
   "private": false,
   "repo_name": "backstage",

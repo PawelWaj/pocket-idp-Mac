@@ -103,7 +103,14 @@ tasks:
                "5min-idp" \
                "5min-idp-control-plane" \
                "kubernetes.docker.internal" \
+               "git.localhost" \
                "gitea.localhost" \
+               "argocd.localhost" \
+               "prometheus.localhost" \
+               "*.5min-idp" \
+               "*.5min-idp-control-plane" \
+               "*.argocd" \
+               "*.localhost" \
                "grafana.localhost" \
                "backstage.localhost" \
                "localhost" \
@@ -199,22 +206,20 @@ tasks:
 
         # Add base64 encoded certificates if they exist
         if [ -f "{{.CERT_DIR}}/server.crt" ]; then
-          echo "TLS_CERT_STRING=$(cat {{.CERT_DIR}}/server.crt | base64)" >> {{.ENV_FILE}}
+          echo "TLS_CERT_STRING=$(cat {{.CERT_DIR}}/server.crt | base64 -w 0)" >> {{.ENV_FILE}}
         else
           echo "TLS_CERT_STRING=" >> {{.ENV_FILE}}
         fi
 
         if [ -f "{{.CERT_DIR}}/server.key" ]; then
-          echo "TLS_KEY_STRING=$(cat {{.CERT_DIR}}/server.key | base64)" >> {{.ENV_FILE}}
+          echo "TLS_KEY_STRING=$(cat {{.CERT_DIR}}/server.key | base64 -w 0)" >> {{.ENV_FILE}}
         else
           echo "TLS_KEY_STRING=" >> {{.ENV_FILE}}
         fi
 
-        if [ -f "{{.CERT_DIR}}/ca.crt" ]; then
-          echo "TLS_CA_CERT=$(cat {{.CERT_DIR}}/ca.crt | base64)" >> {{.ENV_FILE}}
-        else
-          echo "TLS_CA_CERT=" >> {{.ENV_FILE}}
-        fi
+      
+        echo "TLS_CA_CERT=\"$(mkcert -CAROOT)/rootCA.pem\"" >> {{.ENV_FILE}}
+        
 
         echo "✅ Template {{.ENV_FILE}} file generated"
 

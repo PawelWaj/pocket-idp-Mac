@@ -46,6 +46,6 @@ gitea:
     repository.pull-request:
       WORK_IN_PROGRESS_PREFIXES: "WIP:,[WIP]:"
   admin:
-    username: "pocketidpadmin"
-    password: "pocketidpadmin"
+    username: "5minadmin"
+    password: "5minadmin"
     email: "konrad.heimel@nagarro.com"

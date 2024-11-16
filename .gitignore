@@ -6,3 +6,4 @@ setup/terraform/terraform.tfstate*
 certs/*
 .env
 .env.*
+stuff
