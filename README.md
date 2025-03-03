@@ -28,7 +28,8 @@ Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer
 
    ```bash
    # macOS
-   brew install go-task mkcert kumactl
+   brew install go-task mkcert
+   brew install humanitec/tap/cli
 
    # Linux
    sudo apt install mkcert
