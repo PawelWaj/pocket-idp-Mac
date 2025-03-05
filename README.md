@@ -84,6 +84,7 @@ Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer
 
    ```bash
    0_install.sh
+   docker exec mycontainer 0_install.sh
    ```
 
    This script will:
@@ -101,6 +102,7 @@ Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer
    To deploy a sample application that demonstrates the platform capabilities:
    ```bash
    1_demo.sh
+   docker exec mycontainer 1_demo.sh
    ```
 
    This will:
@@ -114,6 +116,7 @@ Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer
    When you're done, you can clean up all resources:
    ```bash
    2_cleanup.sh
+   docker exec mycontainer 2_cleanup.sh
    ```
 
    This script will:
