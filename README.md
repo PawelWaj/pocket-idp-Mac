@@ -77,7 +77,7 @@ Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer
        -v $HOME/.humctl:/root/.humctl \
        -v /var/run/docker.sock:/var/run/docker.sock \
        --network bridge \
-       kheim/pocketidp:latest
+       kheimel/pocket-idp:latest
    ```
 
 5. **Run the installation script inside the container**
