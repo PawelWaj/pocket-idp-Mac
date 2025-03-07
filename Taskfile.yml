@@ -4,7 +4,7 @@ dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
 
 vars:
   IMG_TAG: '{{.IMG_TAG | default "latest"}}'
-  IMG: '{{.IMG | default (printf "kheimel/pocket-idp:%s" .IMG_TAG)}}'
+  IMG: '{{.IMG | default (printf "localhost/pocket-idp:%s" .IMG_TAG)}}'
   PLATFORM: '{{.PLATFORM | default "linux/amd64,linux/arm64"}}'
   CERT_DIR: '{{.CERT_DIR | default "certs"}}'
   ENV_FILE: '.env'
@@ -16,7 +16,7 @@ tasks:
     deps: [ build, check-env ]
     cmds:
       - |
-        docker run --rm -it -h pocketidp --name 5min-idp \
+        docker run --rm -it -h pocket-idp --name 5min-idp \
           -e HUMANITEC_ORG \
           -e HUMANITEC_SERVICE_USER \
           -e TLS_CA_CERT \
@@ -32,10 +32,16 @@ tasks:
     aliases: [ b ]
     desc: Build the 5min-idp image
     cmds:
-      - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} .
+      # - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} .
+      - podman build --platform={{.PLATFORM}} -t {{.IMG}} --format=docker .
       # Ideally we could remove the next step, but docker on GHA doesn't support
       # loading multi-platform builds yet
-      - docker buildx build -t {{.IMG}} --load .
+      #- docker buildx build -t {{.IMG}} --load .
+      # Using Podman in case if we don't have Docker Licence for Docker Desktop and only Docker CLI withoud buildx plugin
+      - podman build -t {{.IMG}} --load --format=docker .
+      - podman save -o pocketidp.tar localhost/pocket-idp:latest
+      - docker load -i pocketidp.tar
+
 
   check-image:
     aliases: [ ci ]
@@ -119,6 +125,7 @@ tasks:
       - |
         # Copy root CA for applications that need it
         cp "$(mkcert -CAROOT)/rootCA.pem" {{.CERT_DIR}}/ca.crt
+        cp "$(mkcert -CAROOT)/rootCA.pem" {{.CERT_DIR}}/rootCA.pem
       - echo "✅ TLS certificates generated in {{.CERT_DIR}} directory"
 
   verify-env:
@@ -218,8 +225,10 @@ tasks:
         fi
 
       
-        echo "TLS_CA_CERT=\"$(mkcert -CAROOT)/rootCA.pem\"" >> {{.ENV_FILE}}
+        CERT_ABS_PATH=$(pwd)/{{.CERT_DIR}}
+        echo "TLS_CA_CERT=${CERT_ABS_PATH}/rootCA.pem" >> {{.ENV_FILE}}
         
+        echo "" 
 
         echo "✅ Template {{.ENV_FILE}} file generated"
 
