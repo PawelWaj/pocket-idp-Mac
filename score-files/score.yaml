@@ -1,5 +1,4 @@
 # Based on https://github.com/score-spec/sample-score-app
-
 apiVersion: score.dev/v1b1
 metadata:
   name: hello-world

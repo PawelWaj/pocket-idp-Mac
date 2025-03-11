@@ -5,5 +5,6 @@ setup/terraform/terraform.tfstate*
 .envrc
 certs/*
 .env
+*.tar
 .env.*
 stuff

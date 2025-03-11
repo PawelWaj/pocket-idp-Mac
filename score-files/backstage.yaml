@@ -17,6 +17,13 @@ containers:
       POSTGRES_USER: ${resources.db.username}
       POSTGRES_PASSWORD: ${resources.db.password}
       POSTGRES_DB: ${resources.db.name}
+    resources:
+      limits:
+        cpu: "900m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
 resources:
   dns:
     type: dns
