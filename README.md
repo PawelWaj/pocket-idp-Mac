@@ -229,3 +229,33 @@ task test           # Run test suite
 ## License
 
 [Add license information]
+
+
+## Backstage Workshop Deployment
+
+This repository contains Score YAML files to deploy a Backstage instance and a sample app on a local Kubernetes cluster for workshop purposes.
+
+## Prerequisites
+
+- A local Kubernetes cluster (e.g., Minikube or Kind)
+- `kubectl` configured to access your cluster
+- Score CLI installed (`npm install -g @score-spec/score-cli`)
+- Helm (for Score humanitec integration, optional)
+
+
+1. Install Score CLI (if not already installed):
+
+2. Deployment
+   Deploy Backstage
+```
+   Generate Kubernetes manifests:
+   score compose -f score-files/backstage-score.yaml > backstage-manifests.yaml
+```
+```
+   kubectl apply -f backstage-manifests.yaml
+```
+3. Access Backstage:
+```
+   kubectl port-forward svc/backstage-workshop 7007:80
+   Open http://localhost:7007 in your browser.
+```
