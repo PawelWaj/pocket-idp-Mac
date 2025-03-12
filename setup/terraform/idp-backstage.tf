@@ -30,3 +30,39 @@ resource "humanitec_value" "backstage_cloud_provider" {
   value       = "5min"
   is_secret   = false
 }
+################ New Code ###############
+
+resource "kubernetes_namespace" "backstage" {
+  metadata {
+    name = "backstage"
+  }
+}
+
+resource "kubernetes_secret_v1" "backstage_cert" {
+  depends_on = [kubernetes_namespace.backstage]
+  metadata {
+    name      = "backstage-tls"
+    namespace = kubernetes_namespace.backstage.metadata[0].name
+  }
+  type = "kubernetes.io/tls"
+  data = {
+    "tls.crt" = base64decode(var.tls_cert_string)
+    "tls.key" = base64decode(var.tls_key_string)
+  }
+}
+
+resource "helm_release" "backstage" {
+  name             = "backstage"
+  namespace        = kubernetes_namespace.backstage.metadata[0].name
+  create_namespace = true
+  repository       = "https://backstage.github.io/charts"
+  chart            = "backstage"
+  version          = "2.4.0"  # Replace with the latest version
+
+  values = [
+    file("${path.module}/backstage_values.yaml")
+  ]
+
+  depends_on = [kubernetes_secret_v1.backstage_cert]
+}
+

@@ -1,0 +1,49 @@
+ingress:
+  enabled: true
+  className: "nginx"
+  host: "backstage.localhost"
+  path: "/"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+  tls:
+    enabled: true
+    secretName: "backstage-tls"
+
+postgresql:
+  enabled: true
+  auth:
+    database: backstage_db
+    username: backstage_user
+    password: supersecret123  # Change in production
+
+backstage:
+  appConfig:
+    auth:
+      environment: development
+      providers:
+        guest: {}
+    app:
+      baseUrl: "https://backstage.localhost"
+    backend:
+      baseUrl: "https://backstage.localhost"
+      listen:
+        port: 7007
+    techdocs:  # ✅ Fixing missing TechDocs config
+      builder: "local"
+      generator:
+        runIn: "local"
+      publisher:
+        type: "local"
+
+  extraEnvVars:
+    - name: NODE_ENV
+      value: "development"
+
+  resources:  # ✅ Adding CPU & Memory Limits
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "250m"
+      memory: "512Mi"

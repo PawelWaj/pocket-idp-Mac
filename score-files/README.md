@@ -320,4 +320,70 @@ We’ll create a template based on the sample app so workshop participants can s
 - **Catalog Automation:** The initial catalog entry is static; for dynamic discovery, use Backstage’s Kubernetes plugin.
 - **Template Flexibility:** The template allows customization, making it workshop-friendly.
 
-Let me know if you need help refining the exercise or troubleshooting the deployment!
+
+
+To forward traffic from your localhost to the Ingress controller in Kubernetes using `kubectl port-forward`, follow these steps:
+
+---
+
+### **1. Find the Ingress Controller's Service**
+Since `kubectl port-forward` works with **Pods** or **Services**, you need to find the **Ingress controller service**.
+
+Run:
+```sh
+kubectl get svc -n ingress-nginx
+```
+You should see output similar to:
+```
+NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.96.81.107    <none>        80:31611/TCP, 443:31612/TCP   12m
+```
+
+If the Ingress Controller service name is different, update the following commands accordingly.
+
+---
+
+### **2. Port Forward the Ingress Service**
+To access your Backstage instance via **http://5min-backstage-qksi-w2yt.localhost**, forward **port 80** from the ingress controller:
+
+```sh
+kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx
+```
+Now, your ingress can be accessed at:
+```
+http://localhost:8080
+```
+
+---
+
+### **3. Automatically Open in Browser (Zsh)**
+In **Zsh**, you can open the URL automatically with:
+
+```sh
+kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx & sleep 2 && open http://5min-backstage-qksi-w2yt.localhost:8080
+```
+
+For Linux (with `xdg-open`):
+```sh
+kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx & sleep 2 && xdg-open http://5min-backstage-qksi-w2yt.localhost:8080
+```
+or 
+```sh
+  k - n ingress-nginx port-forward pods/ingress-nginx-controller-6647957864-cnbw5 8081:443
+```
+---
+
+### **Alternative: Use `hostAliases` (if DNS resolution fails)**
+If `5min-backstage-qksi-w2yt.localhost` doesn’t resolve, update `/etc/hosts`:
+```sh
+echo "127.0.0.1 5min-backstage-qksi-w2yt.localhost" | sudo tee -a /etc/hosts
+```
+
+---
+
+### **Now, you can access Backstage at:**
+```
+http://5min-backstage-qksi-w2yt.localhost:8081
+```
+
+Would you like an automated script for this? 🚀
