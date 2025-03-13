@@ -19,28 +19,37 @@ postgresql:
 
 backstage:
   appConfig:
-    auth:
-      environment: development
-      providers:
-        guest: {}
     app:
       baseUrl: "https://backstage.localhost"
     backend:
       baseUrl: "https://backstage.localhost"
       listen:
         port: 7007
-    techdocs:  # ✅ Fixing missing TechDocs config
+    auth:
+      environment: development
+      providers:
+        guest: {}
+    catalog:
+      locations:
+        - type: url
+          target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/components/artist-lookup-component.yaml
+    techdocs:
       builder: "local"
       generator:
         runIn: "local"
       publisher:
         type: "local"
-
   extraEnvVars:
     - name: NODE_ENV
       value: "development"
-
-  resources:  # ✅ Adding CPU & Memory Limits
+  extraVolumeMounts:
+    - mountPath: "/entities"
+      name: "example-entities"
+  extraVolumes:
+    - name: "example-entities"
+      configMap:
+        name: "backstage-example-entities"
+  resources:
     limits:
       cpu: "500m"
       memory: "1Gi"
