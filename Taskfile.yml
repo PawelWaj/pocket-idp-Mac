@@ -16,7 +16,7 @@ tasks:
     deps: [ build, check-env ]
     cmds:
       - |
-        docker run --rm -it -h pocket-idp --name 5min-idp \
+        docker run --rm -it -h localhost/pocket-idp --name 5min-idp \
           -e HUMANITEC_ORG \
           -e HUMANITEC_SERVICE_USER \
           -e TLS_CA_CERT \

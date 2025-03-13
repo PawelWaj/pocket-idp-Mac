@@ -64,18 +64,6 @@ resource "helm_release" "backstage" {
   ]
 
   depends_on = [
-    kubernetes_secret_v1.backstage_cert,
-    kubernetes_config_map.backstage_entities
-  ]
-}
-
-resource "kubernetes_config_map" "backstage_entities" {
-  depends_on = [kubernetes_namespace.backstage]
-  metadata {
-    name      = "backstage-example-entities"
-    namespace = kubernetes_namespace.backstage.metadata[0].name
-  }
-  data = {
-    "example-entities.yaml" = file("${path.module}/example-entities.yaml")
-  }
+    kubernetes_secret_v1.backstage_cert 
+    ]
 }

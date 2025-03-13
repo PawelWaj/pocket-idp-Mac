@@ -42,13 +42,6 @@ backstage:
   extraEnvVars:
     - name: NODE_ENV
       value: "development"
-  extraVolumeMounts:
-    - mountPath: "/entities"
-      name: "example-entities"
-  extraVolumes:
-    - name: "example-entities"
-      configMap:
-        name: "backstage-example-entities"
   resources:
     limits:
       cpu: "500m"
