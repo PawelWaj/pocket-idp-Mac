@@ -51,19 +51,4 @@ resource "kubernetes_secret_v1" "backstage_cert" {
   }
 }
 
-resource "helm_release" "backstage" {
-  name             = "backstage"
-  namespace        = kubernetes_namespace.backstage.metadata[0].name
-  create_namespace = true
-  repository       = "https://backstage.github.io/charts"
-  chart            = "backstage"
-  version          = "2.4.0"  # Replace with the latest version
 
-  values = [
-    file("${path.module}/backstage_values.yaml")
-  ]
-
-  depends_on = [
-    kubernetes_secret_v1.backstage_cert 
-    ]
-}

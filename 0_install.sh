@@ -81,8 +81,8 @@ while [[ -z $RUNNER_TOKEN ]]; do
     RUNNER_TOKEN=$(echo $response | jq -r '.token')
   fi
   sleep 1
-done
-
+done $RUNNER_TOKEN
+echo 
 # Start Gitea Runner
 docker volume create gitea_runner_data
 docker create \
@@ -117,7 +117,7 @@ curl -k -X 'POST' \
   -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
   -H 'Content-Type: application/json' \
   -d '{
-  "clone_addr": "https://github.com/Nagarro-Platform-Engineering/backstage.git",
+  "clone_addr": "https://github.com/PawelWaj/backstage-humanitec.git",
   "mirror": false,
   "private": false,
   "repo_name": "backstage",
