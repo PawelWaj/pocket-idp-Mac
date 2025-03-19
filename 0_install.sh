@@ -81,8 +81,8 @@ while [[ -z $RUNNER_TOKEN ]]; do
     RUNNER_TOKEN=$(echo $response | jq -r '.token')
   fi
   sleep 1
-done $RUNNER_TOKEN
-echo 
+done 
+
 # Start Gitea Runner
 docker volume create gitea_runner_data
 docker create \
