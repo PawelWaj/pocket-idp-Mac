@@ -32,5 +32,6 @@ resources:
     type: postgres
   resources:
     config:
+      type: volume
       files:
         catalog-info.yaml: ${env.CATALOG_INFO_BASE64 | b64dec}
