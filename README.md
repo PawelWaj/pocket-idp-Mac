@@ -259,3 +259,59 @@ This repository contains Score YAML files to deploy a Backstage instance and a s
    kubectl port-forward svc/backstage-workshop 7007:80
    Open http://localhost:7007 in your browser.
 ```
+
+## Use Colima to Run Docker Containers on macOS
+which you can do by following the Install Homebrew tutorial.
+
+## Uninstalling Docker for Mac
+Before moving forward, you’ll want to remove the existing Docker for Mac application if you have it running. Unfortunately, this process will remove all of your containers as well as your images. You’ll have to rebuild your local images and re-download any upstream images again.
+
+To uninstall Docker for Mac, right-click on the Docker icon in your task bar, select Troubleshooting, and then select Uninstall. This process will warn you that it will remove all of your containers and images, and will then perform the uninstall process. At the end, the Docker for Mac application will exit.
+
+Once it’s completed, you can install Colima.
+
+## Installing Colima and Docker’s CLI with Homebrew
+The fastest way to get Colima installed is through Homebrew.
+
+```
+brew install colima
+```
+Once Colima installs, install Docker and Docker Compose.
+
+```
+brew install docker docker-compose
+```
+Then configure docker-compose as a Docker plugin so you can use docker compose as a command instead of the legacy docker-compose script. First, create a folder in your home directory to hold Docker CLI plugins:
+
+```
+mkdir -p ~/.docker/cli-plugins
+```
+Then symlink the docker-compose command into that new folder:
+
+```
+ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+```
+Run docker compose:
+
+```
+docker compose
+```
+
+```
+brew install docker-Buildx
+```
+Once downloaded, symlink it to the cli-plugins folder:
+
+```
+ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+```
+With the commands installed, you can start Colima and work with containers
+
+## Using Colima to Run Images
+You installed colima, but it isn’t running yet. Colima works by using a virtual machine to run containers, which is similar to how DOcker for Mac works. On the first run, Colima will download and configure a virtual machine to run the containers. This virtual machine has 2 CPUs, 2GiB memory and 60GiB storage, which should be enough for moderate use. You can change the memory size and number of virtual CPUs at any time.
+
+Start Colima with the following command:
+
+```
+colima start
+```
