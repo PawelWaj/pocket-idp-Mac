@@ -32,15 +32,15 @@ tasks:
     aliases: [ b ]
     desc: Build the 5min-idp image
     cmds:
-      # - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} .
-      - podman build --platform={{.PLATFORM}} -t {{.IMG}} --format=docker .
+      #- docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} .
+      #- podman build --platform={{.PLATFORM}} -t {{.IMG}} --format=docker .
       # Ideally we could remove the next step, but docker on GHA doesn't support
       # loading multi-platform builds yet
-      #- docker buildx build -t {{.IMG}} --load .
+      - docker buildx build -t {{.IMG}} --load .
       # Using Podman in case if we don't have Docker Licence for Docker Desktop and only Docker CLI withoud buildx plugin
-      - podman build -t {{.IMG}} --load --format=docker .
-      - podman save -o pocketidp.tar localhost/pocket-idp:latest
-      - docker load -i pocketidp.tar
+      #- podman build -t {{.IMG}} --load --format=docker .
+      #- podman save -o pocketidp.tar localhost/pocket-idp:latest
+      #- docker load -i pocketidp.tar
 
 
   check-image:
