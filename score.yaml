@@ -33,4 +33,4 @@ resources:
   resources:
     config:
       files:
-        catalog-info.yaml: ${values.env.CATALOG_INFO_BASE64 | b64dec}
+        catalog-info.yaml: ${env.CATALOG_INFO_BASE64 | b64dec}
