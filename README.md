@@ -270,7 +270,7 @@ To uninstall Docker for Mac, right-click on the Docker icon in your task bar, se
 
 Once it’s completed, you can install Colima.
 
-## Installing Colima and Docker’s CLI with Homebrew
+## Installing Colima and Docker’s CLI with Homebrew without Docker License
 The fastest way to get Colima installed is through Homebrew.
 
 ```
@@ -296,7 +296,6 @@ Run docker compose:
 ```
 docker compose
 ```
-
 ```
 brew install docker-Buildx
 ```

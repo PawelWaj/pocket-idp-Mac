@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backstage-app-config
+  namespace: backstage
+data:
+  app-config.yaml: |
+    app:
+      title: Backstage
+      baseUrl: http://localhost
+    
+    backend:
+      baseUrl: http://localhost
+      listen:
+        port: 7007
+      database:
+        client: pg
+        connection:
+          host: postgres
+          port: 5432
+          user: backstage
+          password: backstage
+          database: backstage
+    
+    catalog:
+      import:
+        entityFilename: catalog-info.yaml
+        pullRequestBranchName: backstage-integration
+      rules:
+        - allow: [Component, System, API, Resource, Location]
+    
+    auth:
+      providers: {}
+    
+    scaffolder:
+      defaultAuthor:
+        name: Backstage
+        email: backstage@example.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backstage
+  namespace: backstage
+spec:
+  selector:
+    app: backstage
+  ports:
+  - name: http
+    port: 80
+    targetPort: 7007
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+  namespace: backstage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      containers:
+      - name: backstage
+        image: ghcr.io/pawelwaj/backstage-humanitex/backstage:latest
+        ports:
+        - containerPort: 7007
+        volumeMounts:
+        - name: backstage-app-config
+          mountPath: /app/app-config.yaml
+          subPath: app-config.yaml
+        env:
+        - name: NODE_ENV
+          value: "development"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 7007
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: backstage-app-config
+        configMap:
+          name: backstage-app-config

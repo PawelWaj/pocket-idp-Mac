@@ -10,7 +10,7 @@ vars:
   ENV_FILE: '.env'
 
 tasks:
-  run-local:
+  run-local-humanitec:
     aliases: [ r, run ]
     desc: Run the locally built image
     deps: [ build, check-env ]
@@ -27,6 +27,18 @@ tasks:
           -v /var/run/docker.sock:/var/run/docker.sock \
           --network bridge \
           {{.IMG}}
+
+  run-local:
+    aliases: [ r, run ]
+    desc: Run the locally built image
+    deps: [ build ]
+    cmds:
+      - |
+        docker run --rm -it -h localhost/pocket-idp --name workshop \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          --network bridge \
+          {{.IMG}}
+
 
   build:
     aliases: [ b ]
@@ -54,6 +66,12 @@ tasks:
     desc: Export the kubeconfig for the kind cluster
     cmds:
       - kind export kubeconfig --name 5min-idp
+      
+  kind-export-kubeconfig-workshop:
+    aliases: [ kek ]
+    desc: Export the kubeconfig for the kind cluster
+    cmds:
+      - kind export kubeconfig --name workshop
 
   push:
     aliases: [ p ]
