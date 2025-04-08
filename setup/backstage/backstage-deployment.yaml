@@ -67,7 +67,7 @@ spec:
     spec:
       containers:
       - name: backstage
-        image: ghcr.io/pawelwaj/backstage-humanitex/backstage:latest
+        image: docker pull ghcr.io/pawelwaj/backstage/backstage-workshop:latest
         ports:
         - containerPort: 7007
         volumeMounts:
