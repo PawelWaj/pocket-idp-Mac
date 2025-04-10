@@ -24,16 +24,16 @@ kubectl apply -f backstage-namespace.yaml
 echo "Installing NGINX Ingress Controller..."
 bash nginx-ingress-install.sh
 
-# Deploy PostgreSQL
-echo "Deploying PostgreSQL..."
-kubectl apply -f backstage-postgres.yaml
+# # Deploy PostgreSQL
+# echo "Deploying PostgreSQL..."
+# kubectl apply -f backstage-postgres.yaml
 
-# Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL to be ready..."
-kubectl wait --namespace backstage \
-  --for=condition=ready pod \
-  --selector=app=postgres \
-  --timeout=120s || echo "Timeout waiting for PostgreSQL. Continuing anyway..."
+# # Wait for PostgreSQL to be ready
+# echo "Waiting for PostgreSQL to be ready..."
+# kubectl wait --namespace backstage \
+#   --for=condition=ready pod \
+#   --selector=app=postgres \
+#   --timeout=120s || echo "Timeout waiting for PostgreSQL. Continuing anyway..."
 
 # Deploy Backstage
 echo "Deploying Backstage..."
