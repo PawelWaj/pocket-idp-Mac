@@ -1,40 +1,48 @@
-app:
-  baseUrl: http://localhost
-
-backend:
-  baseUrl: http://localhost:7007
-
-service:
-  type: NodePort
-
-backstage:
-  appConfig:
-    app:
-      title: Scaffolded Backstage App
-      baseUrl: http://localhost:3000
-    backend:
-      baseUrl: http://localhost:7007
-      listen:
-        port: 7007
-      database:
-        client: better-sqlite3
-        connection: ':memory:'
-    techdocs:
-      builder: 'local'
-      generator:
-        runIn: 'docker'
-      publisher:
-        type: 'local'
-    auth:
-      providers:
-        guest:
-          dangerouslyAllowOutsideDevelopment: true
-    catalog:
-      rules:
-        - allow: [Component, System, API, Resource, Location]
-      locations:
-        - type: file
-          target: examples/entities.yaml
-
-logging:
-  level: debug
+app:                                                                                                                     
+  baseUrl: http://localhost                                                                                              
+                                                                                                                         
+backend:                                                                                                                 
+  baseUrl: http://localhost:7007                                                                                         
+                                                                                                                         
+service:                                                                                                                 
+  type: NodePort                                                                                                         
+                                                                                                                         
+backstage:                                                                                                               
+  appConfig:                                                                                                             
+    app:                                                                                                                 
+      title: Scaffolded Backstage App                                                                                    
+      baseUrl: http://localhost:3000                                                                                     
+    backend:                                                                                                             
+      baseUrl: http://localhost:7007                                                                                     
+      listen:                                                                                                            
+        port: 7007                                                                                                       
+      database:                                                                                                          
+        client: better-sqlite3                                                                                           
+        connection: ':memory:'                                                                                           
+    techdocs:                                                                                                            
+      builder: 'local'                                                                                                   
+      generator:                                                                                                         
+        runIn: 'docker'                                                                                                  
+      publisher:                                                                                                         
+        type: 'local'                                                                                                    
+    auth:                                                                                                                
+      providers:                                                                                                         
+        guest:                                                                                                           
+          dangerouslyAllowOutsideDevelopment: true                                                                       
+    catalog:                                                                                                             
+      rules:                                                                                                             
+        - allow: [Component, System, API, Resource, Location, Group, Template, User ]                                    
+      locations:                                                                                                         
+        - type: file                                                                                                     
+          target: examples/entities.yaml  # Reverted entities.yaml                                                       
+        - type: file                                                                                                     
+          target: examples/org.yaml       # Added org.yaml                                                               
+        - type: dir                                                                                                      
+          target: examples/template       # Added template directory                                                     
+    scaffolder:                                                                                                          
+      defaultAuthor: scaffolder                                                                                          
+      defaultOwner: scaffolder                                                                                           
+      defaultTemplateLocation: /templates                                                                                
+                                                                                                                         
+logging:                                                                                                                 
+  level: debug                                          
