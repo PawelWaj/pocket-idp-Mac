@@ -46,7 +46,7 @@ helm repo update
 # Deploy Backstage using Helm
 echo "Deploying Backstage using Helm..."
 helm upgrade --install backstage backstage/backstage \
-  --namespace backstage -f /app/setup/backstage/values.yaml
+  --namespace backstage 
 
 # Wait for Backstage pods to be ready
 echo "Waiting for Backstage pods to be ready..."
@@ -54,6 +54,11 @@ kubectl wait --namespace backstage \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/name=backstage \
   --timeout=300s
+
+# Deploy Backstage using Helm
+echo "Upgrade Backstage using Helm..."
+helm upgrade --install backstage backstage/backstage \
+  --namespace backstage -f /app/setup/backstage/values.yaml
 
 echo ""
 echo "Backstage deployment completed!"
