@@ -34,15 +34,15 @@ backstage:
         - allow: [Component, System, API, Resource, Location, Group, Template, User ]                                    
       locations:                                                                                                         
         - type: file                                                                                                     
-          target: examples/entities.yaml  # Reverted entities.yaml                                                       
+          target: /app/examples/entities.yaml  # Reverted entities.yaml                                                       
         - type: file                                                                                                     
-          target: examples/org.yaml       # Added org.yaml                                                               
+          target: /app/examples/org.yaml       # Added org.yaml                                                               
         - type: dir                                                                                                      
-          target: examples/template       # Added template directory                                                     
+          target: /app/examples/template       # Added template directory                                                     
     scaffolder:                                                                                                          
       defaultAuthor: scaffolder                                                                                          
       defaultOwner: scaffolder                                                                                           
-      defaultTemplateLocation: /templates                                                                                
+      defaultTemplateLocation: /app/examples/template                                                                              
                                                                                                                          
 logging:                                                                                                                 
   level: debug                                          
