@@ -67,3 +67,26 @@ echo ""
 echo "Check the status of your deployment:"
 echo "kubectl get pods -n backstage"
 echo "kubectl get ingress -n backstage -o wide"
+
+
+
+# # Update the Backstage deployment with the token
+# echo "Updating Backstage deployment with the token..."
+# helm upgrade --install backstage backstage/backstage \
+#   --namespace backstage \
+#   --set-string "backstage.extraEnvVars[0].name=K8S_SA_TOKEN" \
+#   --set-string "backstage.extraEnvVars[0].value=$K8S_SA_TOKEN" \
+#   --set-string "backstage.appConfig.kubernetes.clusterLocatorMethods[0].clusters[0].serviceAccountToken=$K8S_SA_TOKEN" \
+#   -f /app/setup/backstage/values_templates.yaml
+
+
+  # Run setup script to create ConfigMap and service account token
+bash /app/backstage-template.sh
+
+# # Deploy Backstage using Helm with the token from the script
+# helm upgrade --install backstage backstage/backstage \
+#   --namespace backstage \
+#   --set-string "backstage.extraEnvVars[0].name=K8S_SA_TOKEN" \
+#   --set-string "backstage.extraEnvVars[0].value=$K8S_SA_TOKEN" \
+#   --set-string "backstage.appConfig.kubernetes.clusterLocatorMethods[0].clusters[0].serviceAccountToken=$K8S_SA_TOKEN" \
+#   -f /app/setup/backstage/values_templates.yaml

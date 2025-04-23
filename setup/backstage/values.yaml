@@ -5,7 +5,12 @@ backend:
   baseUrl: http://localhost:7007                                                                                         
                                                                                                                          
 service:                                                                                                                 
-  type: NodePort                                                                                                         
+  type: NodePort       
+
+image:
+  repository: iocanel/backstage
+  tag: latest
+  pullPolicy: IfNotPresent                                                                                                  
                                                                                                                          
 backstage:                                                                                                               
   appConfig:                                                                                                             
