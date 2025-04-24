@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-set -a
-source .env
-set +a
-
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -101,6 +97,11 @@ else
  # argocd login localhost:8080 --username admin --password "${ARGOCD_PASSWORD}" --insecure
 fi
 
+if [ -z "$GITHUB_TOKEN" ]; then
+  echo "GITHUB_TOKEN is not set"
+  exit 1
+fi
+
 # Add your GitHub repository to ArgoCD using the correct password
 echo -e "${YELLOW}Adding your GitHub repository to ArgoCD...${NC}"
 if [ "$PASSWORD_CHANGED" = true ]; then
@@ -141,15 +142,24 @@ data:
         origin: http://localhost:7007
         methods: [GET, POST, PUT, DELETE]
         credentials: true
+      reading:
+        allow:
+          - host: raw.githubusercontent.com
+      logger:
+        level: debug
     
     catalog:
-     rules:
-       - allow: [Component, System, API, Resource, Location, Template]
-     locations:
-       - type: url
-         target: https://raw.githubusercontent.com/PawelWaj/workshop/master/catalog-info.yaml
-       - type: url
-         target: https://raw.githubusercontent.com/PawelWaj/workshop/master/template.yaml
+      rules:
+        - allow: [Component, System, API, Resource, Location, Template]
+      locations:
+        - type: url
+          target: https://raw.githubusercontent.com/PawelWaj/workshop/main/catalog-info.yaml
+        - type: url
+          target: https://raw.githubusercontent.com/PawelWaj/workshop/main/template.yaml
+        - type: url
+          target: https://github.com/PawelWaj/workshop/blob/main/templates/kubernetes-app-template.yaml
+          rules:
+            - allow: [Template]
     
     integrations:
       github:
@@ -195,6 +205,7 @@ spec:
               value: "${GITHUB_TOKEN}"
             - name: ARGOCD_PASSWORD
               value: "${ARGOCD_PASSWORD}"
+
           volumeMounts:
             - name: app-config
               mountPath: /app/app-config.yaml
@@ -332,7 +343,7 @@ echo -e "2. For new deployments, create a PR to this repository."
 echo -e "3. ArgoCD will automatically sync changes from the repo to the cluster."
 echo -e "${BLUE}=========================================================${NC}"
 echo -e "${YELLOW}Important Notes for Integration:${NC}"
-echo -e "1. Replace 'YOUR_GITHUB_TOKEN' in the script with a valid GitHub token."
+echo -e "1. Replace 'GITHUB_TOKEN' in the .env file with a valid GitHub token."
 echo -e "2. Make sure your workshop repository has the following structure:"
 echo -e "   - k8s/ directory with Kubernetes manifests"
 echo -e "   - catalog-info.yaml for Backstage integration"

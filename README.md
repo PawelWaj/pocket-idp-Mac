@@ -314,3 +314,9 @@ Start Colima with the following command:
 ```
 colima start
 ```# workshop
+
+## Deployend Backstage and ArgoCD 
+
+k -n argocd port-forward svc/argocd-server 8080:80
+
+k -n backstage port-forward svc/backstage 7007:7007
