@@ -1,322 +1,202 @@
-# Platform Engineering Bootcamp Pocket IDP
+# Platform Engineering Workshop Hands-On
 
-A practical Internal Developer Platform (IDP) using Backstage and Humanitec, created for the Platform Engineering
-Bootcamp Workshop at FLO 2024 based on the ["Five-minute IDP"](https://developer.humanitec.com/introduction/getting-started/the-five-minute-idp/) getting started guide in the Humanitec developer docs.
+This workshop hands-on part is divided into two days, focusing on different aspects of platform engineering:
+- **Day 1**: Backstage and ArgoCD Integration
+- **Day 2**: Humanitec Platform Engineering (Pocket IDP)
 
-## Table of Contents
+## Prerequisites for Both Days
 
-- [Platform Engineering Bootcamp Pocket IDP](#platform-engineering-bootcamp-pocket-idp)
-  - [Table of Contents](#table-of-contents)
-  - [Quick Start](#quick-start)
-  - [Available Tasks](#available-tasks)
-  - [Prerequisites](#prerequisites)
-  - [Repository Structure](#repository-structure)
-  - [Detailed Documentation](#detailed-documentation)
-  - [Local Development Setup](#local-development-setup)
-  - [TLS Certificate Management](#tls-certificate-management)
-  - [Environment Configuration](#environment-configuration)
-  - [Troubleshooting](#troubleshooting)
-  - [Contributing](#contributing)
-  - [License](#license)
+- GitHub account with personal access token (with `repo` scope)
+- Docker and Docker Compose installed
+- kubectl installed
+- Basic understanding of Kubernetes concepts
+- Terminal/command line familiarity
 
-## Quick Start
+## Day 1: Backstage and ArgoCD
 
-0. **Create a free Humanitec account**
-   [Humanitec Free Trial](https://humanitec.com/free-trial).
+Learn how to create and deploy Kubernetes applications using Backstage Software Templates and ArgoCD.
 
-1. **Install Prerequisites**
+### Prerequisites for Day 1
 
+- Create a GitHub Personal Access Token with `repo` scope
+- Clone this repository https://github.com/PawelWaj/pocket-idp-Mac.git
+- Create a `.env` file in the root directory with your GitHub token:
+  ```
+  GITHUB_TOKEN=your_github_token_here
+  ```
+
+### Setup Instructions
+
+1. Start the local environment (docker container with all necessary files):
    ```bash
-   # macOS
-   brew install go-task mkcert
-   brew install humanitec/tap/cli
-
-   # Linux
-   sudo apt install mkcert
-   sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
-   
-   # Install humctl (Linux/macOS)
-   curl -L "https://cli.humanitec.io/linux_x86_64" | tar xz
-   sudo mv humctl /usr/local/bin
+   task run-local 
    ```
 
-2. **Setup Humanitec**
-
+2. Install kind kluster from docker container from step 1
    ```bash
-   # Login to Humanitec
-   humctl login
+   ./0_kind_cluster-setup
+   ```
 
-   # Set your organization ID (automatically from humctl)
+3. Install ArgoCD and Backstage from docker container from step 1
+   ```bash
+   ./1_ArgoCD-deploy-script
+   ```
+4. Export your kubeconfig: `task kind-export-kubeconfig-workshop`
+5. Access Backstage at: http://localhost:8080
+   - kubectl -n backstage port-forward svc/backstage-workshop 7007:7007 
+
+6. Access ArgoCD dashboard at: http://localhost:8080
+   - kubectl -n argocd port-forward svc/argocd-server 8080:80 
+   - Default credentials: user: `admin`, password: `password`
+    
+
+### Workshop Steps
+
+For detailed workshop steps, refer to our [Workshop Instructions](https://github.com/PawelWaj/workshop/blob/main/README.md).
+
+1. Access the Backstage Portal
+2. Create a new component using the Kubernetes Application Template (register existing component)
+   - Template URL: `https://github.com/PawelWaj/workshop/blob/main/templates/kubernetes-app-template.yaml`
+3. Fill in template details (use lowercase letters only)
+4. Generate the template
+5. Make the created GitHub repository public
+6. Create an ArgoCD application pointing to your manifests
+7. Verify deployment
+
+## Day 2: Humanitec Platform Engineering (Pocket IDP)
+
+On Day 2, you'll learn how to use Humanitec for platform engineering and continuous delivery by implementing a practical Internal Developer Platform (IDP).
+
+### Prerequisites for Day 2
+
+- Complete Day 1 workshop
+- Create a free [Humanitec account](https://humanitec.com/free-trial)
+- Install additional tools:
+  ```bash
+  # macOS
+  brew install go-task mkcert
+  brew install humanitec/tap/cli
+
+  # Linux
+  sudo apt install mkcert
+  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+  
+  # Install humctl (Linux/macOS)
+  curl -L "https://cli.humanitec.io/linux_x86_64" | tar xz
+  sudo mv humctl /usr/local/bin
+  ```
+- Clone the Pocket-PlatformOps repository:
+  ```bash
+  git clone https://github.com/PawelWaj/pocket-idp-Mac.git
+  cd pocket-idp-Mac
+  git checkout backstage
+  ```
+
+### Setup Instructions
+
+1. Login to Humanitec:
+   ```bash
+   humctl login
+   
+   # Set your organization ID
    export HUMANITEC_ORG="$(humctl get organization -o yaml | yq '.[0].metadata.id')"
    ```
 
-3. **Setup Environment**
-
+2. Generate certificates and environment file:
    ```bash
-   # Generate certificates
    task generate-certs
-
-   # Create and configure environment file
    task generate-env
    ```
 
-4. **Run the IDP**
-
-   ```bash
-   task run-local
+3. Create a `.env` file in the pocket-idp-Mac directory with:
+   ```
+   GITHUB_TOKEN=your_github_token_here
    ```
 
+4. Start the local environment:
    ```bash
-   docker run --rm -it -h pocketidp --name 5min-idp \
-       -e HUMANITEC_ORG \
-       -e HUMANITEC_SERVICE_USER \
-       -e TLS_CA_CERT \
-       -e TLS_CERT_STRING \
-       -e TLS_KEY_STRING \
-       -v hum-5min-idp:/state \
-       -v $HOME/.humctl:/root/.humctl \
-       -v /var/run/docker.sock:/var/run/docker.sock \
-       --network bridge \
-       kheimel/pocket-idp:latest
+   ./run-local start 0
    ```
 
-5. **Run the installation script inside the container**
-
+5. Run the installation script (This sets up Kind cluster, Gitea, Backstage, etc.):
    ```bash
-   0_install.sh
-   docker exec mycontainer 0_install.sh
+   ./run-local start 1
    ```
 
-   This script will:
-    - Set up a local Kind cluster
-    - Configure a local container registry
-    - Install and configure Gitea with a runner for CI/CD
-    - Set up Backstage with Humanitec integration
-    - Configure TLS certificates and networking
+6. Configure port forwarding for all required services:
+   ```bash
+   ./run-local port-forward
+   ```
 
-> 🗒️ Note:
-> This script takes at least 5 minutes to complete.
+### Hands-on Tasks
 
-6. **Deploy the Demo Application** (Optional)
-
-   To deploy a sample application that demonstrates the platform capabilities:
+1. Deploy the Demo Application:
    ```bash
    1_demo.sh
-   docker exec mycontainer 1_demo.sh
    ```
-
    This will:
-    - Create a sample microservices application
-    - Set up CI/CD pipelines in Gitea
-    - Deploy the application through Humanitec
-    - Configure Backstage to display the application
+   - Create a sample microservices application
+   - Set up CI/CD pipelines in Gitea
+   - Deploy the application through Humanitec
+   - Configure Backstage to display the application
 
-7. **Cleanup Resources**
+2. Access your resources:
+   - Export your kubeconfig: `task export-kubeconfig`
+   - Visit [Humanitec Dashboard](https://app.humanitec.io)
+   - Use `kubectl` to interact with your local cluster
+   - Access Backstage through the configured endpoint
 
-   When you're done, you can clean up all resources:
-   ```bash
-   2_cleanup.sh
-   docker exec mycontainer 2_cleanup.sh
-   ```
-
-   This script will:
-    - Remove the Kind cluster
-    - Clean up local container registry
-    - Remove deployed applications
-    - Delete local certificates and configurations
-
-8. **Access Your Resources**
-
-   Export your kubeconfig to interact with the local cluster:
-   ```bash
-   task export-kubeconfig
-   ```
-
-   You can now:
-    - Visit your [Humanitec Dashboard](https://app.humanitec.io) to see the deployed resources
-    - Use `kubectl` to interact with your local cluster
-    - Access Backstage through the configured endpoint
-
-9. **Sign in to your local Gitea instance**
-
-   Gitea is a self-hosted Git service replicating GitHub. It is used to host the repository for the demo application.
-
-   [git.localhost:30443](http://git.localhost:30443)
-
-   ![Gitea Login](./assets/gitea-login.png)
-
-   Login with the following credentials:
+3. Sign in to your local Gitea instance:
+   - URL: http://git.localhost:30443
    - Username: `5minadmin`
    - Password: `5minadmin`
 
-## Available Tasks
+4. Explore the integration between Backstage and Humanitec
+
+## Cleanup Instructions
+
+When you're done with the workshop, you can clean up all resources:
 
 ```bash
-task --list
-
-# Common commands:
-task run-local      # Run the IDP locally
-task generate-certs  # Generate TLS certificates for local development
-task generate-env    # Create template .env file with required variables
-task verify-env      # Check if all required variables are set
-task build          # Build the container image
-task push           # Push the container image to the registry
-task test           # Run test suite
+2_cleanup.sh
 ```
 
-## Prerequisites
+This script will:
+- Remove the Kind cluster
+- Clean up local container registry
+- Remove deployed applications
+- Delete local certificates and configurations
 
-- Docker Desktop (or equivalent)
-- [Task](https://taskfile.dev/#/installation) - Task runner
-- [mkcert](https://github.com/FiloSottile/mkcert) - Local certificate authority
-- [Humanitec Account](https://humanitec.com/free-trial) - Platform orchestration
+## Using Colima (For macOS Users)
 
-## Repository Structure
+If you're using macOS and don't have Docker Desktop, you can use Colima:
 
-```txt
-.
-├── README.md
-├── Taskfile.yml                # Task definitions
-├── backstage/                  # Backstage configuration
-├── scripts/                    # Setup scripts
-└── resources/                  # Resource templates
-```
+1. Install Colima and Docker CLI:
+   ```bash
+   brew install colima
+   brew install docker docker-compose
+   ```
 
-## Detailed Documentation
+2. Configure Docker Compose as a plugin:
+   ```bash
+   mkdir -p ~/.docker/cli-plugins
+   ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+   ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+   ```
 
-- [Platform Engineering Bootcamp Pocket IDP](#platform-engineering-bootcamp-pocket-idp)
-  - [Table of Contents](#table-of-contents)
-  - [Quick Start](#quick-start)
-  - [Available Tasks](#available-tasks)
-  - [Prerequisites](#prerequisites)
-  - [Repository Structure](#repository-structure)
-  - [Detailed Documentation](#detailed-documentation)
-  - [Local Development Setup](#local-development-setup)
-  - [TLS Certificate Management](#tls-certificate-management)
-  - [Environment Configuration](#environment-configuration)
-  - [Troubleshooting](#troubleshooting)
-  - [Contributing](#contributing)
-  - [License](#license)
-
-## Local Development Setup
-
-[Previous detailed setup content...]
-
-## TLS Certificate Management
-
-[Previous TLS content...]
-
-## Environment Configuration
-
-[Previous environment variable content...]
+3. Start Colima:
+   ```bash
+   colima start
+   ```
 
 ## Troubleshooting
 
-[Previous troubleshooting content...]
+- **Backstage Registration Error**: Ensure all form fields are filled correctly
+- **ArgoCD Sync Error**: Verify your repository is public
+- **GitHub Token Issues**: Confirm your token has the required scopes
+- **Port Conflicts**: Check if any services are already running on required ports
+- **TLS Certificate Issues**: Re-run `task generate-certs` if you encounter certificate problems
 
-## Contributing
+## Support
 
-1. Install pre-commit hooks:
-   ```bash
-   pre-commit install --hook-type commit-msg
-   ```
-
-2. Run tests before submitting PRs:
-   ```bash
-   task test
-   ```
-
-## License
-
-[Add license information]
-
-
-## Backstage Workshop Deployment
-
-This repository contains Score YAML files to deploy a Backstage instance and a sample app on a local Kubernetes cluster for workshop purposes.
-
-## Prerequisites
-
-- A local Kubernetes cluster (e.g., Minikube or Kind)
-- `kubectl` configured to access your cluster
-- Score CLI installed (`npm install -g @score-spec/score-cli`)
-- Helm (for Score humanitec integration, optional)
-
-
-1. Install Score CLI (if not already installed):
-
-2. Deployment
-   Deploy Backstage
-```
-   Generate Kubernetes manifests:
-   score compose -f score-files/backstage-score.yaml > backstage-manifests.yaml
-```
-```
-   kubectl apply -f backstage-manifests.yaml
-```
-3. Access Backstage:
-```
-   kubectl port-forward svc/backstage-workshop 7007:80
-   Open http://localhost:7007 in your browser.
-```
-
-## Use Colima to Run Docker Containers on macOS
-which you can do by following the Install Homebrew tutorial.
-
-## Uninstalling Docker for Mac
-Before moving forward, you’ll want to remove the existing Docker for Mac application if you have it running. Unfortunately, this process will remove all of your containers as well as your images. You’ll have to rebuild your local images and re-download any upstream images again.
-
-To uninstall Docker for Mac, right-click on the Docker icon in your task bar, select Troubleshooting, and then select Uninstall. This process will warn you that it will remove all of your containers and images, and will then perform the uninstall process. At the end, the Docker for Mac application will exit.
-
-Once it’s completed, you can install Colima.
-
-## Installing Colima and Docker’s CLI with Homebrew without Docker License
-The fastest way to get Colima installed is through Homebrew.
-
-```
-brew install colima
-```
-Once Colima installs, install Docker and Docker Compose.
-
-```
-brew install docker docker-compose
-```
-Then configure docker-compose as a Docker plugin so you can use docker compose as a command instead of the legacy docker-compose script. First, create a folder in your home directory to hold Docker CLI plugins:
-
-```
-mkdir -p ~/.docker/cli-plugins
-```
-Then symlink the docker-compose command into that new folder:
-
-```
-ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-```
-Run docker compose:
-
-```
-docker compose
-```
-```
-brew install docker-Buildx
-```
-Once downloaded, symlink it to the cli-plugins folder:
-
-```
-ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
-```
-With the commands installed, you can start Colima and work with containers
-
-## Using Colima to Run Images
-You installed colima, but it isn’t running yet. Colima works by using a virtual machine to run containers, which is similar to how DOcker for Mac works. On the first run, Colima will download and configure a virtual machine to run the containers. This virtual machine has 2 CPUs, 2GiB memory and 60GiB storage, which should be enough for moderate use. You can change the memory size and number of virtual CPUs at any time.
-
-Start Colima with the following command:
-
-```
-colima start
-```# workshop
-
-## Deployend Backstage and ArgoCD 
-
-k -n argocd port-forward svc/argocd-server 8080:80
-
-k -n backstage port-forward svc/backstage 7007:7007
+If you encounter any issues during the workshop, please reach out to the workshop facilitators.
